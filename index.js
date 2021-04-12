@@ -6,13 +6,7 @@ const app = express()
 app.use(express.json())
 
 
-morgan.token('data', (req, res) => {
-    if (req.method !== "POST") {
-        return null
-    }
-    return JSON.stringify(req.body)
-}
-)
+morgan.token('data', (req, res) => JSON.stringify(req.body))
 
 app.use(morgan('tiny', {
     skip: (req, res) => req.method === "POST"
