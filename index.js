@@ -1,6 +1,27 @@
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
+
 app.use(express.json())
+
+
+morgan.token('data', (req, res) => {
+    if (req.method !== "POST") {
+        return null
+    }
+    return JSON.stringify(req.body)
+}
+)
+
+app.use(morgan('tiny', {
+    skip: (req, res) => req.method === "POST"
+}))
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data', {
+    skip: (req, res) => req.method !== "POST"
+}))
+
 
 let persons = [
     {
@@ -53,11 +74,11 @@ app.delete("/api/persons/:id", (request, response) => {
 })
 
 
-app.post("/api/persons", (request, response) => {
 
-    //console.log(randomNumber)
+
+app.post("/api/persons", (request, response) => {
     const body = request.body
-    //console.log(person)
+
     if (!body.name) {
         return response.status(400).json({
             error: "name is missing"
@@ -83,14 +104,18 @@ app.post("/api/persons", (request, response) => {
         name: body.name,
         number: body.number,
     }
-    
-    
+
+
     persons = persons.concat(person)
 
     response.json(person)
-
-
 })
+
+/* const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint) */
 
 
 
